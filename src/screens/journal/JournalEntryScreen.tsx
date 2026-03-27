@@ -10,6 +10,7 @@ import type { JournalStackParamList } from '@/navigation/types';
 import { useJournalEntry, useDeleteJournalEntry } from '@/hooks/useJournal';
 import { MOOD_EMOJIS, MOOD_LABELS } from '@/lib/constants';
 import { formatFullDate } from '@/utils/dateUtils';
+import { useTheme } from '@/lib/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<JournalStackParamList, 'JournalEntry'>;
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export default function JournalEntryScreen({ navigation, route }: Props) {
+  const c = useTheme();
   const { entryId } = route.params;
   const { data: entry, isLoading } = useJournalEntry(entryId);
   const deleteEntry = useDeleteJournalEntry();
@@ -35,10 +37,91 @@ export default function JournalEntryScreen({ navigation, route }: Props) {
     ]);
   };
 
+  const styles = StyleSheet.create({
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.card,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: c.card,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      gap: 16,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 20,
+    },
+    dateText: {
+      fontSize: 14,
+      color: c.textPlaceholder,
+      marginTop: 20,
+      marginBottom: 8,
+    },
+    moodRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 16,
+    },
+    moodEmoji: {
+      fontSize: 30,
+    },
+    moodLabel: {
+      color: c.textMuted,
+    },
+    entryTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: c.text,
+      marginBottom: 16,
+    },
+    entryContent: {
+      fontSize: 16,
+      color: c.cardAlt,
+      lineHeight: 28,
+    },
+    tagsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginTop: 20,
+    },
+    tagBadge: {
+      backgroundColor: c.primaryBg,
+      borderRadius: 9999,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+    },
+    tagText: {
+      fontSize: 12,
+      color: c.primaryDark,
+      fontWeight: '500',
+    },
+    wordCount: {
+      fontSize: 12,
+      color: c.borderStrong,
+      marginTop: 16,
+    },
+  });
+
   if (isLoading || !entry) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator color="#3b82f6" />
+        <ActivityIndicator color={c.primary} />
       </SafeAreaView>
     );
   }
@@ -48,16 +131,16 @@ export default function JournalEntryScreen({ navigation, route }: Props) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#64748b" />
+          <Ionicons name="arrow-back" size={24} color={c.textMuted} />
         </TouchableOpacity>
         <View style={styles.headerActions}>
           <TouchableOpacity
             onPress={() => navigation.navigate('JournalEditor', { entryId, date: entry.entry_date })}
           >
-            <Ionicons name="pencil-outline" size={22} color="#3b82f6" />
+            <Ionicons name="pencil-outline" size={22} color={c.primary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleDelete}>
-            <Ionicons name="trash-outline" size={22} color="#ef4444" />
+            <Ionicons name="trash-outline" size={22} color={c.danger} />
           </TouchableOpacity>
         </View>
       </View>
@@ -102,84 +185,3 @@ export default function JournalEntryScreen({ navigation, route }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#94a3b8',
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  moodRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  moodEmoji: {
-    fontSize: 30,
-  },
-  moodLabel: {
-    color: '#64748b',
-  },
-  entryTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-    marginBottom: 16,
-  },
-  entryContent: {
-    fontSize: 16,
-    color: '#334155',
-    lineHeight: 28,
-  },
-  tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 20,
-  },
-  tagBadge: {
-    backgroundColor: '#eff6ff',
-    borderRadius: 9999,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  tagText: {
-    fontSize: 12,
-    color: '#2563eb',
-    fontWeight: '500',
-  },
-  wordCount: {
-    fontSize: 12,
-    color: '#cbd5e1',
-    marginTop: 16,
-  },
-});

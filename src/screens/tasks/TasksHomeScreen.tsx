@@ -10,8 +10,10 @@ import { useTasks, useProjects, useToggleTask } from '@/hooks/useTasks';
 import { useAuthStore } from '@/store/authStore';
 import TaskCard from '@/components/tasks/TaskCard';
 import EmptyState from '@/components/ui/EmptyState';
+import FadeInView from '@/components/ui/FadeInView';
 import { isOverdue, isDueToday } from '@/utils/dateUtils';
 import type { Task } from '@/types';
+import { useTheme } from '@/lib/theme';
 
 type Props = { navigation: NativeStackNavigationProp<TasksStackParamList, 'TasksHome'> };
 
@@ -25,6 +27,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 ];
 
 export default function TasksHomeScreen({ navigation }: Props) {
+  const c = useTheme();
   const profile = useAuthStore((s) => s.profile);
   const [filter, setFilter] = useState<Filter>('all');
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
@@ -57,6 +60,117 @@ export default function TasksHomeScreen({ navigation }: Props) {
     if (hour < 20) return 'Buenas tardes';
     return 'Buenas noches';
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.bg,
+    },
+    flex1: {
+      flex: 1,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 12,
+      backgroundColor: c.card,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    greetingText: {
+      color: c.textMuted,
+      fontSize: 14,
+    },
+    titleText: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: c.text,
+    },
+    filterScroll: {
+      marginTop: 12,
+      marginHorizontal: -4,
+    },
+    filterChip: {
+      marginHorizontal: 4,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 9999,
+    },
+    filterChipActive: {
+      backgroundColor: c.primaryDark,
+    },
+    filterChipInactive: {
+      backgroundColor: c.cardAlt,
+    },
+    filterChipText: {
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    filterChipTextActive: {
+      color: '#ffffff',
+    },
+    filterChipTextInactive: {
+      color: c.textMuted,
+    },
+    projectScroll: {
+      marginTop: 8,
+      marginHorizontal: -4,
+    },
+    projectChip: {
+      marginHorizontal: 4,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 9999,
+      borderWidth: 1,
+    },
+    projectChipActive: {
+      borderColor: c.primaryDark,
+    },
+    projectChipInactive: {
+      borderColor: c.borderStrong,
+    },
+    projectChipRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    projectDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 9999,
+    },
+    projectChipText: {
+      fontSize: 12,
+      fontWeight: '500',
+    },
+    projectChipTextActive: {
+      color: c.primaryDark,
+    },
+    projectChipTextInactive: {
+      color: c.textMuted,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: c.border,
+      marginLeft: 36,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 24,
+      right: 24,
+      backgroundColor: c.primaryDark,
+      width: 56,
+      height: 56,
+      borderRadius: 9999,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -131,13 +245,15 @@ export default function TasksHomeScreen({ navigation }: Props) {
             ItemSeparatorComponent={() => (
               <View style={styles.separator} />
             )}
-            renderItem={({ item }) => (
-              <TaskCard
-                task={item}
-                onToggle={(id, done) => toggleTask.mutate({ id, done })}
-                onPress={(id) => navigation.navigate('TaskDetail', { taskId: id })}
-                projectColor={getProjectColor(item.project_id)}
-              />
+            renderItem={({ item, index }) => (
+              <FadeInView index={index}>
+                <TaskCard
+                  task={item}
+                  onToggle={(id, done) => toggleTask.mutate({ id, done })}
+                  onPress={(id) => navigation.navigate('TaskDetail', { taskId: id })}
+                  projectColor={getProjectColor(item.project_id)}
+                />
+              </FadeInView>
             )}
           />
         )}
@@ -153,114 +269,3 @@ export default function TasksHomeScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  flex1: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  greetingText: {
-    color: '#64748b',
-    fontSize: 14,
-  },
-  titleText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  filterScroll: {
-    marginTop: 12,
-    marginHorizontal: -4,
-  },
-  filterChip: {
-    marginHorizontal: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 9999,
-  },
-  filterChipActive: {
-    backgroundColor: '#2563eb',
-  },
-  filterChipInactive: {
-    backgroundColor: '#f1f5f9',
-  },
-  filterChipText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  filterChipTextActive: {
-    color: '#ffffff',
-  },
-  filterChipTextInactive: {
-    color: '#475569',
-  },
-  projectScroll: {
-    marginTop: 8,
-    marginHorizontal: -4,
-  },
-  projectChip: {
-    marginHorizontal: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 9999,
-    borderWidth: 1,
-  },
-  projectChipActive: {
-    borderColor: '#2563eb',
-  },
-  projectChipInactive: {
-    borderColor: '#e2e8f0',
-  },
-  projectChipRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  projectDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 9999,
-  },
-  projectChipText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  projectChipTextActive: {
-    color: '#2563eb',
-  },
-  projectChipTextInactive: {
-    color: '#64748b',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f1f5f9',
-    marginLeft: 36,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    backgroundColor: '#2563eb',
-    width: 56,
-    height: 56,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-});

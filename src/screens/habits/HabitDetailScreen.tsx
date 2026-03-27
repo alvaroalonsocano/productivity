@@ -16,6 +16,7 @@ import { subDays, format } from 'date-fns';
 import { habitService } from '@/services/habit.service';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
+import { useTheme } from '@/lib/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<HabitsStackParamList, 'HabitDetail'>;
@@ -23,6 +24,7 @@ type Props = {
 };
 
 export default function HabitDetailScreen({ navigation, route }: Props) {
+  const c = useTheme();
   const { habitId } = route.params;
   const userId = useAuthStore((s) => s.user?.id);
   const qc = useQueryClient();
@@ -56,10 +58,113 @@ export default function HabitDetailScreen({ navigation, route }: Props) {
     ]);
   };
 
+  const styles = StyleSheet.create({
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.card,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: c.card,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 20,
+    },
+    habitInfoCenter: {
+      alignItems: 'center',
+      marginTop: 24,
+      marginBottom: 24,
+    },
+    habitIconContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 12,
+    },
+    habitIcon: {
+      fontSize: 36,
+    },
+    habitName: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: c.text,
+    },
+    habitCategory: {
+      fontSize: 14,
+      color: c.textPlaceholder,
+      marginTop: 4,
+    },
+    statsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      backgroundColor: c.bg,
+      borderRadius: 16,
+      paddingVertical: 20,
+      marginBottom: 24,
+    },
+    statItem: {
+      alignItems: 'center',
+    },
+    statValue: {
+      fontSize: 24,
+      fontWeight: 'bold',
+    },
+    statValueDark: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: c.text,
+    },
+    statLabel: {
+      fontSize: 12,
+      color: c.textPlaceholder,
+      marginTop: 4,
+    },
+    statDivider: {
+      width: 1,
+      backgroundColor: c.borderStrong,
+    },
+    sectionLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.textMuted,
+      marginBottom: 12,
+    },
+    sectionLabelTop: {
+      marginTop: 24,
+    },
+    heatMap: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 4,
+    },
+    heatMapCell: {
+      width: 28,
+      height: 28,
+      borderRadius: 4,
+    },
+    bottomSpacer: {
+      height: 32,
+    },
+  });
+
   if (isLoading || !habit) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator color="#3b82f6" />
+        <ActivityIndicator color={c.primary} />
       </SafeAreaView>
     );
   }
@@ -69,10 +174,10 @@ export default function HabitDetailScreen({ navigation, route }: Props) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#64748b" />
+          <Ionicons name="arrow-back" size={24} color={c.textMuted} />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleArchive}>
-          <Ionicons name="archive-outline" size={22} color="#94a3b8" />
+          <Ionicons name="archive-outline" size={22} color={c.textPlaceholder} />
         </TouchableOpacity>
       </View>
 
@@ -131,7 +236,7 @@ export default function HabitDetailScreen({ navigation, route }: Props) {
           {heatMapDates.map((date) => (
             <View
               key={date}
-              style={[styles.heatMapCell, { backgroundColor: completedDates.has(date) ? habit.color : '#f1f5f9' }]}
+              style={[styles.heatMapCell, { backgroundColor: completedDates.has(date) ? habit.color : c.border }]}
             />
           ))}
         </View>
@@ -141,106 +246,3 @@ export default function HabitDetailScreen({ navigation, route }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  habitInfoCenter: {
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 24,
-  },
-  habitIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  habitIcon: {
-    fontSize: 36,
-  },
-  habitName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  habitCategory: {
-    fontSize: 14,
-    color: '#94a3b8',
-    marginTop: 4,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-    paddingVertical: 20,
-    marginBottom: 24,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  statValueDark: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#94a3b8',
-    marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: '#e2e8f0',
-  },
-  sectionLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-    marginBottom: 12,
-  },
-  sectionLabelTop: {
-    marginTop: 24,
-  },
-  heatMap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 4,
-  },
-  heatMapCell: {
-    width: 28,
-    height: 28,
-    borderRadius: 4,
-  },
-  bottomSpacer: {
-    height: 32,
-  },
-});

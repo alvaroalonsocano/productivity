@@ -10,10 +10,119 @@ import EmptyState from '@/components/ui/EmptyState';
 import { MOOD_EMOJIS } from '@/lib/constants';
 import { formatDate, formatFullDate, toDateString } from '@/utils/dateUtils';
 import type { JournalEntry } from '@/types';
+import { useTheme } from '@/lib/theme';
+import type { AppColors } from '@/lib/theme';
 
 type Props = { navigation: NativeStackNavigationProp<JournalStackParamList, 'JournalHome'> };
 
-function EntryCard({ entry, onPress }: { entry: JournalEntry; onPress: () => void }) {
+function makeStyles(c: AppColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.bg,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 16,
+      backgroundColor: c.card,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: c.text,
+    },
+    entryCount: {
+      fontSize: 14,
+      color: c.textPlaceholder,
+      marginTop: 2,
+    },
+    entryCard: {
+      backgroundColor: c.card,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    entryCardInner: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+    },
+    entryCardContent: {
+      flex: 1,
+    },
+    entryMeta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 4,
+    },
+    entryDate: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: c.textPlaceholder,
+    },
+    entryMoodEmoji: {
+      fontSize: 16,
+    },
+    entryTitle: {
+      fontWeight: 'bold',
+      color: c.text,
+      fontSize: 16,
+      marginBottom: 4,
+    },
+    entryContent: {
+      color: c.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    entryFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginTop: 12,
+    },
+    entryWordCount: {
+      fontSize: 12,
+      color: c.borderStrong,
+    },
+    tagBadge: {
+      backgroundColor: c.cardAlt,
+      borderRadius: 9999,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+    },
+    tagText: {
+      fontSize: 12,
+      color: c.textMuted,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 24,
+      right: 24,
+      backgroundColor: c.primaryDark,
+      width: 56,
+      height: 56,
+      borderRadius: 9999,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+  });
+}
+
+function EntryCard({ entry, onPress, styles }: { entry: JournalEntry; onPress: () => void; styles: ReturnType<typeof makeStyles> }) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -49,6 +158,8 @@ function EntryCard({ entry, onPress }: { entry: JournalEntry; onPress: () => voi
 }
 
 export default function JournalHomeScreen({ navigation }: Props) {
+  const c = useTheme();
+  const styles = makeStyles(c);
   const today = toDateString(new Date());
   const { data: entries = [], isLoading, refetch, isFetching } = useJournalEntries();
 
@@ -81,6 +192,7 @@ export default function JournalHomeScreen({ navigation }: Props) {
           renderItem={({ item }) => (
             <EntryCard
               entry={item}
+              styles={styles}
               onPress={() => navigation.navigate('JournalEntry', { entryId: item.id })}
             />
           )}
@@ -97,108 +209,3 @@ export default function JournalHomeScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  entryCount: {
-    fontSize: 14,
-    color: '#94a3b8',
-    marginTop: 2,
-  },
-  entryCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  entryCardInner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
-  entryCardContent: {
-    flex: 1,
-  },
-  entryMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  entryDate: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#94a3b8',
-  },
-  entryMoodEmoji: {
-    fontSize: 16,
-  },
-  entryTitle: {
-    fontWeight: 'bold',
-    color: '#0f172a',
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  entryContent: {
-    color: '#64748b',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  entryFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 12,
-  },
-  entryWordCount: {
-    fontSize: 12,
-    color: '#cbd5e1',
-  },
-  tagBadge: {
-    backgroundColor: '#f1f5f9',
-    borderRadius: 9999,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  tagText: {
-    fontSize: 12,
-    color: '#64748b',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    backgroundColor: '#2563eb',
-    width: 56,
-    height: 56,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-});

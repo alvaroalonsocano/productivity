@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/navigation/types';
+import { useTheme } from '@/lib/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'Welcome'>;
@@ -14,6 +15,36 @@ const features = [
 ];
 
 export default function WelcomeScreen({ navigation }: Props) {
+  const c = useTheme();
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.card },
+    inner: { flex: 1, paddingHorizontal: 24, justifyContent: 'space-between', paddingVertical: 48 },
+    header: { alignItems: 'center', marginTop: 32 },
+    emoji: { fontSize: 48, marginBottom: 16 },
+    title: { fontSize: 36, fontWeight: 'bold', color: c.text, textAlign: 'center' },
+    subtitle: { color: c.textMuted, textAlign: 'center', marginTop: 12, fontSize: 16 },
+    features: { gap: 12 },
+    featureCard: {
+      flexDirection: 'row', alignItems: 'center', gap: 16,
+      backgroundColor: c.bg, borderRadius: 16, padding: 16,
+    },
+    featureIcon: { fontSize: 28 },
+    featureText: { flex: 1 },
+    featureTitle: { fontWeight: '600', color: c.text, fontSize: 16 },
+    featureDesc: { color: c.textMuted, fontSize: 14, marginTop: 2 },
+    buttons: { gap: 12 },
+    btnPrimary: {
+      backgroundColor: c.primaryDark, borderRadius: 16,
+      paddingVertical: 16, alignItems: 'center',
+    },
+    btnPrimaryText: { color: '#ffffff', fontWeight: 'bold', fontSize: 16 },
+    btnSecondary: {
+      borderRadius: 16, paddingVertical: 16,
+      alignItems: 'center', borderWidth: 1, borderColor: c.borderStrong,
+    },
+    btnSecondaryText: { color: c.cardAlt, fontWeight: '600', fontSize: 16 },
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -56,32 +87,3 @@ export default function WelcomeScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
-  inner: { flex: 1, paddingHorizontal: 24, justifyContent: 'space-between', paddingVertical: 48 },
-  header: { alignItems: 'center', marginTop: 32 },
-  emoji: { fontSize: 48, marginBottom: 16 },
-  title: { fontSize: 36, fontWeight: 'bold', color: '#0f172a', textAlign: 'center' },
-  subtitle: { color: '#64748b', textAlign: 'center', marginTop: 12, fontSize: 16 },
-  features: { gap: 12 },
-  featureCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 16,
-    backgroundColor: '#f8fafc', borderRadius: 16, padding: 16,
-  },
-  featureIcon: { fontSize: 28 },
-  featureText: { flex: 1 },
-  featureTitle: { fontWeight: '600', color: '#0f172a', fontSize: 16 },
-  featureDesc: { color: '#64748b', fontSize: 14, marginTop: 2 },
-  buttons: { gap: 12 },
-  btnPrimary: {
-    backgroundColor: '#2563eb', borderRadius: 16,
-    paddingVertical: 16, alignItems: 'center',
-  },
-  btnPrimaryText: { color: '#ffffff', fontWeight: 'bold', fontSize: 16 },
-  btnSecondary: {
-    borderRadius: 16, paddingVertical: 16,
-    alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0',
-  },
-  btnSecondaryText: { color: '#334155', fontWeight: '600', fontSize: 16 },
-});

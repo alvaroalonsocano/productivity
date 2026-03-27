@@ -10,6 +10,7 @@ import type { TasksStackParamList } from '@/navigation/types';
 import { useCreateTask, useProjects } from '@/hooks/useTasks';
 import { PRIORITY_COLORS, PRIORITY_LABELS } from '@/lib/constants';
 import type { Priority } from '@/types';
+import { useTheme } from '@/lib/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<TasksStackParamList, 'CreateTask'>;
@@ -19,6 +20,7 @@ type Props = {
 const PRIORITIES: Priority[] = ['none', 'low', 'medium', 'high', 'urgent'];
 
 export default function CreateTaskScreen({ navigation, route }: Props) {
+  const c = useTheme();
   const params = route.params;
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -54,6 +56,105 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.card,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    cancelText: {
+      color: c.textMuted,
+      fontSize: 16,
+    },
+    headerTitle: {
+      fontWeight: 'bold',
+      color: c.text,
+      fontSize: 16,
+    },
+    saveText: {
+      color: c.primaryDark,
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 20,
+    },
+    titleInput: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: c.text,
+      marginTop: 20,
+      marginBottom: 8,
+    },
+    addDescRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingVertical: 8,
+    },
+    addDescText: {
+      color: c.textPlaceholder,
+      fontSize: 14,
+    },
+    descInput: {
+      color: c.textMuted,
+      fontSize: 16,
+      paddingVertical: 8,
+      minHeight: 64,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: c.border,
+      marginVertical: 16,
+    },
+    sectionLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.textMuted,
+      marginBottom: 12,
+    },
+    chipRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginBottom: 20,
+      alignItems: 'center',
+    },
+    chip: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 9999,
+      borderWidth: 1,
+    },
+    chipText: {
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    projectDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 9999,
+    },
+    dateInput: {
+      backgroundColor: c.bg,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      color: c.text,
+      fontSize: 16,
+      marginBottom: 32,
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -64,7 +165,7 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
         <Text style={styles.headerTitle}>Nueva tarea</Text>
         <TouchableOpacity onPress={handleSave} disabled={createTask.isPending}>
           {createTask.isPending ? (
-            <ActivityIndicator color="#3b82f6" />
+            <ActivityIndicator color={c.primary} />
           ) : (
             <Text style={styles.saveText}>Guardar</Text>
           )}
@@ -77,7 +178,7 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
           value={title}
           onChangeText={setTitle}
           placeholder="¿Qué hay que hacer?"
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor={c.textPlaceholder}
           autoFocus
           multiline
           style={styles.titleInput}
@@ -86,7 +187,7 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
         {/* Description toggle */}
         {!showDesc ? (
           <TouchableOpacity onPress={() => setShowDesc(true)} style={styles.addDescRow}>
-            <Ionicons name="add-circle-outline" size={18} color="#94a3b8" />
+            <Ionicons name="add-circle-outline" size={18} color={c.textPlaceholder} />
             <Text style={styles.addDescText}>Añadir descripción</Text>
           </TouchableOpacity>
         ) : (
@@ -94,7 +195,7 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
             value={description}
             onChangeText={setDescription}
             placeholder="Descripción..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={c.textPlaceholder}
             multiline
             style={styles.descInput}
           />
@@ -112,12 +213,12 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
               style={[
                 styles.chip,
                 {
-                  borderColor: priority === p ? PRIORITY_COLORS[p] : '#e2e8f0',
+                  borderColor: priority === p ? PRIORITY_COLORS[p] : c.borderStrong,
                   backgroundColor: priority === p ? PRIORITY_COLORS[p] + '20' : 'transparent',
                 },
               ]}
             >
-              <Text style={[styles.chipText, { color: priority === p ? PRIORITY_COLORS[p] : '#94a3b8' }]}>
+              <Text style={[styles.chipText, { color: priority === p ? PRIORITY_COLORS[p] : c.textPlaceholder }]}>
                 {PRIORITY_LABELS[p]}
               </Text>
             </TouchableOpacity>
@@ -133,10 +234,10 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
                 onPress={() => setProjectId(null)}
                 style={[
                   styles.chip,
-                  { borderColor: !projectId ? '#3b82f6' : '#e2e8f0', backgroundColor: !projectId ? '#eff6ff' : 'transparent' },
+                  { borderColor: !projectId ? c.primary : c.borderStrong, backgroundColor: !projectId ? c.primaryBg : 'transparent' },
                 ]}
               >
-                <Text style={[styles.chipText, { color: !projectId ? '#3b82f6' : '#94a3b8' }]}>
+                <Text style={[styles.chipText, { color: !projectId ? c.primary : c.textPlaceholder }]}>
                   Sin proyecto
                 </Text>
               </TouchableOpacity>
@@ -148,13 +249,13 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
                     styles.chip,
                     styles.chipRow,
                     {
-                      borderColor: projectId === p.id ? p.color : '#e2e8f0',
+                      borderColor: projectId === p.id ? p.color : c.borderStrong,
                       backgroundColor: projectId === p.id ? p.color + '20' : 'transparent',
                     },
                   ]}
                 >
                   <View style={[styles.projectDot, { backgroundColor: p.color }]} />
-                  <Text style={[styles.chipText, { color: projectId === p.id ? p.color : '#94a3b8' }]}>
+                  <Text style={[styles.chipText, { color: projectId === p.id ? p.color : c.textPlaceholder }]}>
                     {p.name}
                   </Text>
                 </TouchableOpacity>
@@ -169,109 +270,10 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
           value={dueDate}
           onChangeText={setDueDate}
           placeholder="YYYY-MM-DD (ej: 2025-12-31)"
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor={c.textPlaceholder}
           style={styles.dateInput}
         />
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  cancelText: {
-    color: '#64748b',
-    fontSize: 16,
-  },
-  headerTitle: {
-    fontWeight: 'bold',
-    color: '#0f172a',
-    fontSize: 16,
-  },
-  saveText: {
-    color: '#2563eb',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  titleInput: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#0f172a',
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  addDescRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-  },
-  addDescText: {
-    color: '#94a3b8',
-    fontSize: 14,
-  },
-  descInput: {
-    color: '#475569',
-    fontSize: 16,
-    paddingVertical: 8,
-    minHeight: 64,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#f1f5f9',
-    marginVertical: 16,
-  },
-  sectionLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#475569',
-    marginBottom: 12,
-  },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 9999,
-    borderWidth: 1,
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  projectDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 9999,
-  },
-  dateInput: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: '#0f172a',
-    fontSize: 16,
-    marginBottom: 32,
-  },
-});
