@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  SafeAreaView, Alert, ActivityIndicator, StyleSheet,
+  SafeAreaView, Alert, ActivityIndicator, StyleSheet, Switch, Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { HabitsStackParamList } from '@/navigation/types';
 import { useCreateHabit } from '@/hooks/useHabits';
@@ -10,6 +11,7 @@ import { HABIT_CATEGORY_LABELS, HABIT_CATEGORY_ICONS, HABIT_COLORS, DAY_NAMES } 
 import { toDateString } from '@/utils/dateUtils';
 import type { HabitCategory } from '@/types';
 import { useTheme } from '@/lib/theme';
+import { scheduleHabitReminder, requestNotificationPermissions } from '@/services/notifications.service';
 
 type Props = { navigation: NativeStackNavigationProp<HabitsStackParamList, 'CreateHabit'> };
 
@@ -23,6 +25,9 @@ export default function CreateHabitScreen({ navigation }: Props) {
   const [color, setColor] = useState(HABIT_COLORS[0]);
   const [category, setCategory] = useState<HabitCategory>('other');
   const [targetDays, setTargetDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
+  const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [reminderTime, setReminderTime] = useState(() => { const d = new Date(); d.setHours(9, 0, 0, 0); return d; });
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const createHabit = useCreateHabit();
 
@@ -30,6 +35,19 @@ export default function CreateHabitScreen({ navigation }: Props) {
     setTargetDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
     );
+  };
+
+  const reminderTimeString = `${String(reminderTime.getHours()).padStart(2, '0')}:${String(reminderTime.getMinutes()).padStart(2, '0')}`;
+
+  const handleReminderToggle = async (value: boolean) => {
+    if (value) {
+      const granted = await requestNotificationPermissions();
+      if (!granted) {
+        Alert.alert('Permisos necesarios', 'Activa las notificaciones en Ajustes para recibir recordatorios.');
+        return;
+      }
+    }
+    setReminderEnabled(value);
   };
 
   const handleSave = async () => {
@@ -42,7 +60,7 @@ export default function CreateHabitScreen({ navigation }: Props) {
       return;
     }
     try {
-      await createHabit.mutateAsync({
+      const habit = await createHabit.mutateAsync({
         name: name.trim(),
         icon,
         color,
@@ -51,11 +69,14 @@ export default function CreateHabitScreen({ navigation }: Props) {
         target_days: targetDays.sort(),
         target_count: 1,
         description: null,
-        reminder_time: null,
-        reminder_enabled: false,
+        reminder_time: reminderEnabled ? reminderTimeString : null,
+        reminder_enabled: reminderEnabled,
         archived: false,
         start_date: toDateString(new Date()),
       });
+      if (reminderEnabled && habit) {
+        await scheduleHabitReminder({ ...habit, reminder_time: reminderTimeString, reminder_enabled: true, target_days: targetDays.sort() });
+      }
       navigation.goBack();
     } catch {
       Alert.alert('Error', 'No se pudo crear el hábito.');
@@ -177,7 +198,35 @@ export default function CreateHabitScreen({ navigation }: Props) {
     daysRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 32,
+      marginBottom: 24,
+    },
+    reminderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      backgroundColor: c.bg,
+      borderRadius: 12,
+      marginBottom: 8,
+    },
+    reminderLabel: {
+      fontSize: 16,
+      color: c.text,
+      fontWeight: '500',
+    },
+    reminderTimeButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      backgroundColor: c.primaryBg,
+      borderRadius: 10,
+      marginBottom: 24,
+      alignSelf: 'flex-start',
+    },
+    reminderTimeText: {
+      color: c.primary,
+      fontSize: 16,
+      fontWeight: '600',
     },
     dayButton: {
       width: 40,
@@ -314,6 +363,38 @@ export default function CreateHabitScreen({ navigation }: Props) {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Reminder */}
+        <Text style={styles.sectionLabel}>Recordatorio</Text>
+        <View style={styles.reminderRow}>
+          <Text style={styles.reminderLabel}>🔔 Activar recordatorio</Text>
+          <Switch
+            value={reminderEnabled}
+            onValueChange={handleReminderToggle}
+            trackColor={{ false: c.borderStrong, true: color }}
+            thumbColor="white"
+          />
+        </View>
+        {reminderEnabled && (
+          <>
+            <TouchableOpacity style={styles.reminderTimeButton} onPress={() => setShowTimePicker(true)}>
+              <Text style={styles.reminderTimeText}>⏰ {reminderTimeString}</Text>
+            </TouchableOpacity>
+            {(showTimePicker || Platform.OS === 'ios') && (
+              <DateTimePicker
+                value={reminderTime}
+                mode="time"
+                is24Hour
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(_, date) => {
+                  setShowTimePicker(false);
+                  if (date) setReminderTime(date);
+                }}
+              />
+            )}
+          </>
+        )}
+        <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
   );
