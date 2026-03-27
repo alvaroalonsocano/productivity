@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import type { AppTabParamList } from './types';
+import DashboardScreen from '@/screens/dashboard/DashboardScreen';
 import TasksStack from './TasksStack';
 import HabitsStack from './HabitsStack';
 import JournalStack from './JournalStack';
@@ -22,6 +23,7 @@ export default function AppTabs() {
         },
         tabBarIcon: ({ color, size, focused }) => {
           const icons: Record<string, { active: string; inactive: string }> = {
+            Dashboard: { active: 'home', inactive: 'home-outline' },
             Tasks: { active: 'checkmark-circle', inactive: 'checkmark-circle-outline' },
             Habits: { active: 'flame', inactive: 'flame-outline' },
             Journal: { active: 'journal', inactive: 'journal-outline' },
@@ -39,6 +41,7 @@ export default function AppTabs() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
       })}
     >
+      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Inicio' }} />
       <Tab.Screen name="Tasks" component={TasksStack} options={{ title: 'Tareas' }} />
       <Tab.Screen name="Habits" component={HabitsStack} options={{ title: 'Hábitos' }} />
       <Tab.Screen name="Journal" component={JournalStack} options={{ title: 'Diario' }} />
