@@ -1,11 +1,5 @@
-import React, { useEffect } from 'react';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withDelay,
-  Easing,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { Animated } from 'react-native';
 
 interface FadeInViewProps {
   children: React.ReactNode;
@@ -13,20 +7,21 @@ interface FadeInViewProps {
   duration?: number;
 }
 
-export default function FadeInView({ children, index = 0, duration = 300 }: FadeInViewProps) {
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(16);
+export default function FadeInView({ children, index = 0, duration = 280 }: FadeInViewProps) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(12)).current;
 
   useEffect(() => {
-    const delay = index * 50;
-    opacity.value = withDelay(delay, withTiming(1, { duration, easing: Easing.out(Easing.quad) }));
-    translateY.value = withDelay(delay, withTiming(0, { duration, easing: Easing.out(Easing.quad) }));
+    const delay = index * 40;
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration, delay, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 0, duration, delay, useNativeDriver: true }),
+    ]).start();
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
-  }));
-
-  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
+      {children}
+    </Animated.View>
+  );
 }

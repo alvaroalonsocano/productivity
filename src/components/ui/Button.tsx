@@ -1,6 +1,5 @@
-import React from 'react';
-import { Text, ActivityIndicator, StyleSheet, Pressable, type PressableProps, View } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import React, { useRef } from 'react';
+import { Text, ActivityIndicator, StyleSheet, Pressable, type PressableProps, Animated } from 'react-native';
 import { useTheme } from '@/lib/theme';
 import { useHaptics } from '@/hooks/useHaptics';
 
@@ -29,11 +28,10 @@ export default function Button({
   const c = useTheme();
   const haptics = useHaptics();
   const isDisabled = disabled || loading;
+  const scale = useRef(new Animated.Value(1)).current;
 
-  const scale = useSharedValue(1);
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const pressIn = () => Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 50 }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 50 }).start();
 
   const variantContainer: Record<Variant, object> = {
     primary: { backgroundColor: c.primaryDark },
@@ -55,6 +53,7 @@ export default function Button({
     sizeContainer[size],
     fullWidth && styles.fullWidth,
     isDisabled && styles.disabled,
+    { transform: [{ scale }] },
     style,
   ];
 
@@ -62,11 +61,11 @@ export default function Button({
     <Pressable
       {...rest}
       disabled={isDisabled}
-      onPressIn={() => { scale.value = withSpring(0.96, { damping: 15, stiffness: 400 }); }}
-      onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 400 }); }}
+      onPressIn={pressIn}
+      onPressOut={pressOut}
       onPress={(e) => { haptics.light(); onPress?.(e); }}
     >
-      <Animated.View style={[containerStyle, animatedStyle]}>
+      <Animated.View style={containerStyle}>
         {loading ? (
           <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? 'white' : c.primary} />
         ) : (

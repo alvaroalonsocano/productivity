@@ -1,11 +1,5 @@
-import React, { memo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withSequence,
-} from 'react-native-reanimated';
+import React, { memo, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import type { Habit, HabitLog } from '@/types';
 import { computeStreak } from '@/utils/streakUtils';
 import { useTheme } from '@/lib/theme';
@@ -25,80 +19,36 @@ export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, on
   const isCompleted = logs.some((l) => l.habit_id === habit.id && l.log_date === selectedDate);
   const streak = computeStreak(habit, logs.filter((l) => l.habit_id === habit.id));
 
-  const checkScale = useSharedValue(1);
-  const checkAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: checkScale.value }],
-  }));
+  const checkScale = useRef(new Animated.Value(1)).current;
 
   const handleToggle = () => {
     if (!isCompleted) {
       haptics.success();
-      checkScale.value = withSequence(
-        withSpring(1.3, { damping: 8, stiffness: 600 }),
-        withSpring(1, { damping: 10, stiffness: 400 })
-      );
+      Animated.sequence([
+        Animated.spring(checkScale, { toValue: 1.3, useNativeDriver: true, speed: 80 }),
+        Animated.spring(checkScale, { toValue: 1, useNativeDriver: true, speed: 30 }),
+      ]).start();
     } else {
       haptics.light();
-      checkScale.value = withSequence(
-        withSpring(0.9, { damping: 10, stiffness: 400 }),
-        withSpring(1, { damping: 10, stiffness: 300 })
-      );
+      Animated.sequence([
+        Animated.spring(checkScale, { toValue: 0.85, useNativeDriver: true, speed: 80 }),
+        Animated.spring(checkScale, { toValue: 1, useNativeDriver: true, speed: 30 }),
+      ]).start();
     }
     onToggle(habit.id, selectedDate, !isCompleted);
   };
 
   const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 16,
-      paddingVertical: 12,
-    },
-    iconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    icon: {
-      fontSize: 24,
-    },
-    info: {
-      flex: 1,
-    },
-    name: {
-      fontWeight: '600',
-      color: c.text,
-      fontSize: 16,
-    },
-    metaRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginTop: 2,
-    },
-    streakText: {
-      fontSize: 12,
-      color: '#f97316',
-      fontWeight: '500',
-    },
-    rateText: {
-      fontSize: 12,
-      color: c.textPlaceholder,
-    },
-    checkButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 9999,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 2,
-    },
-    checkmark: {
-      color: '#ffffff',
-      fontSize: 18,
-    },
+    container: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 12 },
+    iconContainer: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+    icon: { fontSize: 24 },
+    info: { flex: 1 },
+    name: { fontWeight: '600', color: c.text, fontSize: 16 },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
+    streakText: { fontSize: 12, color: '#f97316', fontWeight: '500' },
+    rateText: { fontSize: 12, color: c.textPlaceholder },
+    checkButton: { width: 40, height: 40, borderRadius: 9999, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
+    checkmark: { color: '#ffffff', fontSize: 18 },
   });
 
   return (
@@ -106,29 +56,22 @@ export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, on
       <View style={[styles.iconContainer, { backgroundColor: habit.color + '20' }]}>
         <Text style={styles.icon}>{habit.icon ?? '✨'}</Text>
       </View>
-
       <View style={styles.info}>
         <Text style={styles.name}>{habit.name}</Text>
         <View style={styles.metaRow}>
           {streak.current_streak > 0 && (
             <Text style={styles.streakText}>🔥 {streak.current_streak} días</Text>
           )}
-          <Text style={styles.rateText}>
-            {Math.round(streak.completion_rate_30d * 100)}% últimos 30d
-          </Text>
+          <Text style={styles.rateText}>{Math.round(streak.completion_rate_30d * 100)}% últimos 30d</Text>
         </View>
       </View>
-
-      <Animated.View style={checkAnimatedStyle}>
+      <Animated.View style={{ transform: [{ scale: checkScale }] }}>
         <TouchableOpacity
           onPress={handleToggle}
-          style={[
-            styles.checkButton,
-            {
-              borderColor: isCompleted ? habit.color : c.borderStrong,
-              backgroundColor: isCompleted ? habit.color : 'transparent',
-            },
-          ]}
+          style={[styles.checkButton, {
+            borderColor: isCompleted ? habit.color : c.borderStrong,
+            backgroundColor: isCompleted ? habit.color : 'transparent',
+          }]}
         >
           {isCompleted && <Text style={styles.checkmark}>✓</Text>}
         </TouchableOpacity>
