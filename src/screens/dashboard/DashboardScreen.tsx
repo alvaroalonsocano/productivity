@@ -14,10 +14,12 @@ import { useJournalEntryByDate } from '@/hooks/useJournal';
 import { useAuthStore } from '@/store/authStore';
 import { MOOD_EMOJIS, MOOD_LABELS } from '@/lib/constants';
 import { isDueToday, isOverdue } from '@/utils/dateUtils';
+import { useTheme } from '@/lib/theme';
 
 type Props = { navigation: BottomTabNavigationProp<AppTabParamList, 'Dashboard'> };
 
 export default function DashboardScreen({ navigation }: Props) {
+  const c = useTheme();
   const profile = useAuthStore((s) => s.profile);
   const today = format(new Date(), 'yyyy-MM-dd');
   const dayLabel = format(new Date(), "EEEE, d 'de' MMMM", { locale: es });
@@ -48,11 +50,187 @@ export default function DashboardScreen({ navigation }: Props) {
 
   const isLoading = tasksLoading || habitsLoading;
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.bg,
+    },
+    loadingCenter: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    scroll: {
+      paddingHorizontal: 20,
+      paddingTop: 20,
+    },
+    header: {
+      marginBottom: 20,
+    },
+    dayLabel: {
+      fontSize: 13,
+      color: c.textMuted,
+      textTransform: 'capitalize',
+      marginBottom: 2,
+    },
+    greeting: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: c.text,
+    },
+    summaryRow: {
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 24,
+    },
+    summaryCard: {
+      flex: 1,
+      borderRadius: 14,
+      padding: 12,
+      alignItems: 'center',
+      gap: 4,
+    },
+    summaryNumber: {
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    summaryLabel: {
+      fontSize: 11,
+      color: c.textMuted,
+      textAlign: 'center',
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 10,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: c.text,
+    },
+    sectionLink: {
+      fontSize: 13,
+      color: c.primary,
+      fontWeight: '500',
+    },
+    emptyCard: {
+      backgroundColor: c.card,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    emptyText: {
+      color: c.textMuted,
+      fontSize: 14,
+      textAlign: 'center',
+    },
+    taskRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.card,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      marginBottom: 6,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 10,
+    },
+    taskDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    taskDotToday: {
+      backgroundColor: c.primary,
+    },
+    taskDotOverdue: {
+      backgroundColor: c.danger,
+    },
+    taskTitle: {
+      flex: 1,
+      fontSize: 14,
+      color: c.textSecondary,
+    },
+    overdueLabel: {
+      fontSize: 11,
+      color: c.danger,
+      fontWeight: '500',
+    },
+    habitsGrid: {
+      gap: 8,
+    },
+    habitChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.card,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 10,
+    },
+    habitIcon: {
+      fontSize: 20,
+    },
+    habitName: {
+      flex: 1,
+      fontSize: 14,
+      color: c.textSecondary,
+    },
+    journalCard: {
+      backgroundColor: c.card,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 4,
+    },
+    journalMood: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: c.text,
+    },
+    journalTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: c.textSecondary,
+    },
+    journalPreview: {
+      fontSize: 13,
+      color: c.textMuted,
+      marginTop: 2,
+    },
+    journalCta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      backgroundColor: c.primaryBg,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: c.primaryBorder,
+    },
+    journalCtaText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: c.primary,
+    },
+  });
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color="#3b82f6" />
+          <ActivityIndicator size="large" color={c.primary} />
         </View>
       </SafeAreaView>
     );
@@ -70,27 +248,27 @@ export default function DashboardScreen({ navigation }: Props) {
 
         {/* Summary cards */}
         <View style={styles.summaryRow}>
-          <View style={[styles.summaryCard, { backgroundColor: '#eff6ff' }]}>
-            <Ionicons name="checkmark-circle" size={22} color="#3b82f6" />
-            <Text style={[styles.summaryNumber, { color: '#3b82f6' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: c.primaryBg }]}>
+            <Ionicons name="checkmark-circle" size={22} color={c.primary} />
+            <Text style={[styles.summaryNumber, { color: c.primary }]}>
               {doneTodayTasks.length}/{totalTodayTasks || '—'}
             </Text>
             <Text style={styles.summaryLabel}>Tareas hoy</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#fef3c7' }]}>
-            <Ionicons name="flame" size={22} color="#f59e0b" />
-            <Text style={[styles.summaryNumber, { color: '#f59e0b' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: c.warningBg }]}>
+            <Ionicons name="flame" size={22} color={c.warning} />
+            <Text style={[styles.summaryNumber, { color: c.warning }]}>
               {completedHabits.length}/{habits.length || '—'}
             </Text>
             <Text style={styles.summaryLabel}>Hábitos hoy</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: todayEntry ? '#f0fdf4' : '#f8fafc' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: todayEntry ? c.successBg : c.cardAlt }]}>
             <Ionicons
               name="journal"
               size={22}
-              color={todayEntry ? '#22c55e' : '#94a3b8'}
+              color={todayEntry ? c.success : c.textPlaceholder}
             />
-            <Text style={[styles.summaryNumber, { color: todayEntry ? '#22c55e' : '#94a3b8' }]}>
+            <Text style={[styles.summaryNumber, { color: todayEntry ? c.success : c.textPlaceholder }]}>
               {todayEntry ? MOOD_EMOJIS[todayEntry.mood ?? 3] : '—'}
             </Text>
             <Text style={styles.summaryLabel}>Diario hoy</Text>
@@ -152,7 +330,7 @@ export default function DashboardScreen({ navigation }: Props) {
                 >
                   <Text style={styles.habitIcon}>{habit.icon}</Text>
                   <Text style={styles.habitName} numberOfLines={1}>{habit.name}</Text>
-                  <Ionicons name="add-circle-outline" size={18} color="#3b82f6" />
+                  <Ionicons name="add-circle-outline" size={18} color={c.primary} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -182,7 +360,7 @@ export default function DashboardScreen({ navigation }: Props) {
               style={styles.journalCta}
               onPress={() => navigation.navigate('Journal', { screen: 'JournalEditor', params: { date: today } })}
             >
-              <Ionicons name="pencil-outline" size={20} color="#3b82f6" />
+              <Ionicons name="pencil-outline" size={20} color={c.primary} />
               <Text style={styles.journalCtaText}>Escribir la entrada de hoy</Text>
             </TouchableOpacity>
           )}
@@ -193,179 +371,3 @@ export default function DashboardScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  loadingCenter: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scroll: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  dayLabel: {
-    fontSize: 13,
-    color: '#64748b',
-    textTransform: 'capitalize',
-    marginBottom: 2,
-  },
-  greeting: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 24,
-  },
-  summaryCard: {
-    flex: 1,
-    borderRadius: 14,
-    padding: 12,
-    alignItems: 'center',
-    gap: 4,
-  },
-  summaryNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  summaryLabel: {
-    fontSize: 11,
-    color: '#64748b',
-    textAlign: 'center',
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#0f172a',
-  },
-  sectionLink: {
-    fontSize: 13,
-    color: '#3b82f6',
-    fontWeight: '500',
-  },
-  emptyCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-  },
-  emptyText: {
-    color: '#64748b',
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  taskRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-    gap: 10,
-  },
-  taskDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  taskDotToday: {
-    backgroundColor: '#3b82f6',
-  },
-  taskDotOverdue: {
-    backgroundColor: '#ef4444',
-  },
-  taskTitle: {
-    flex: 1,
-    fontSize: 14,
-    color: '#1e293b',
-  },
-  overdueLabel: {
-    fontSize: 11,
-    color: '#ef4444',
-    fontWeight: '500',
-  },
-  habitsGrid: {
-    gap: 8,
-  },
-  habitChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-    gap: 10,
-  },
-  habitIcon: {
-    fontSize: 20,
-  },
-  habitName: {
-    flex: 1,
-    fontSize: 14,
-    color: '#1e293b',
-  },
-  journalCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-    gap: 4,
-  },
-  journalMood: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#0f172a',
-  },
-  journalTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#1e293b',
-  },
-  journalPreview: {
-    fontSize: 13,
-    color: '#64748b',
-    marginTop: 2,
-  },
-  journalCta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#eff6ff',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#bfdbfe',
-  },
-  journalCtaText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#3b82f6',
-  },
-});

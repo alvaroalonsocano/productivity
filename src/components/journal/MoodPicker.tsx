@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MOOD_EMOJIS, MOOD_LABELS } from '@/lib/constants';
 import type { Mood } from '@/types';
+import { useTheme } from '@/lib/theme';
 
 interface MoodPickerProps {
   selected: Mood | null;
@@ -9,6 +10,38 @@ interface MoodPickerProps {
 }
 
 export default function MoodPicker({ selected, onSelect }: MoodPickerProps) {
+  const c = useTheme();
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+    moodButton: {
+      alignItems: 'center',
+      gap: 4,
+    },
+    moodIconContainer: {
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    moodEmoji: {
+      fontSize: 28,
+    },
+    moodLabel: {
+      fontSize: 12,
+    },
+    moodLabelSelected: {
+      color: c.primaryDark,
+      fontWeight: '500',
+    },
+    moodLabelDefault: {
+      color: c.textPlaceholder,
+    },
+  });
+
   return (
     <View style={styles.container}>
       {([1, 2, 3, 4, 5] as Mood[]).map((mood) => (
@@ -21,9 +54,9 @@ export default function MoodPicker({ selected, onSelect }: MoodPickerProps) {
             style={[
               styles.moodIconContainer,
               {
-                backgroundColor: selected === mood ? '#eff6ff' : '#f8fafc',
+                backgroundColor: selected === mood ? c.primaryBg : c.bg,
                 borderWidth: selected === mood ? 2 : 0,
-                borderColor: '#3b82f6',
+                borderColor: c.primary,
               },
             ]}
           >
@@ -37,34 +70,3 @@ export default function MoodPicker({ selected, onSelect }: MoodPickerProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  moodButton: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  moodIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  moodEmoji: {
-    fontSize: 28,
-  },
-  moodLabel: {
-    fontSize: 12,
-  },
-  moodLabelSelected: {
-    color: '#2563eb',
-    fontWeight: '500',
-  },
-  moodLabelDefault: {
-    color: '#94a3b8',
-  },
-});

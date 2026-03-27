@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/authStore';
 import TaskCard from '@/components/tasks/TaskCard';
 import ProgressBar from '@/components/ui/ProgressBar';
 import EmptyState from '@/components/ui/EmptyState';
+import { useTheme } from '@/lib/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<TasksStackParamList, 'ProjectDetail'>;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export default function ProjectDetailScreen({ navigation, route }: Props) {
+  const c = useTheme();
   const { projectId } = route.params;
   const userId = useAuthStore((s) => s.user?.id);
   const qc = useQueryClient();
@@ -51,6 +53,80 @@ export default function ProjectDetailScreen({ navigation, route }: Props) {
     ]);
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.bg,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 16,
+      backgroundColor: c.card,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    projectTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginTop: 12,
+    },
+    projectDot: {
+      width: 16,
+      height: 16,
+      borderRadius: 9999,
+    },
+    projectTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: c.text,
+    },
+    progressSection: {
+      marginTop: 12,
+    },
+    progressLabelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 4,
+    },
+    progressLabel: {
+      fontSize: 12,
+      color: c.textMuted,
+    },
+    progressPercent: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: c.primaryDark,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: c.border,
+      marginLeft: 36,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 24,
+      right: 24,
+      backgroundColor: c.primaryDark,
+      width: 56,
+      height: 56,
+      borderRadius: 9999,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+  });
+
   if (!project) return null;
 
   return (
@@ -59,10 +135,10 @@ export default function ProjectDetailScreen({ navigation, route }: Props) {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#64748b" />
+            <Ionicons name="arrow-back" size={24} color={c.textMuted} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleArchive}>
-            <Ionicons name="archive-outline" size={22} color="#94a3b8" />
+            <Ionicons name="archive-outline" size={22} color={c.textPlaceholder} />
           </TouchableOpacity>
         </View>
         <View style={styles.projectTitleRow}>
@@ -112,77 +188,3 @@ export default function ProjectDetailScreen({ navigation, route }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  projectTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 12,
-  },
-  projectDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 9999,
-  },
-  projectTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  progressSection: {
-    marginTop: 12,
-  },
-  progressLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  progressLabel: {
-    fontSize: 12,
-    color: '#64748b',
-  },
-  progressPercent: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#2563eb',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f1f5f9',
-    marginLeft: 36,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    backgroundColor: '#2563eb',
-    width: 56,
-    height: 56,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-});

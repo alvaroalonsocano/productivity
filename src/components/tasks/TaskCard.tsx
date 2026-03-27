@@ -4,6 +4,7 @@ import type { Task } from '@/types';
 import { PRIORITY_COLORS, PRIORITY_LABELS } from '@/lib/constants';
 import { formatDate, isOverdue } from '@/utils/dateUtils';
 import Checkbox from '@/components/ui/Checkbox';
+import { useTheme } from '@/lib/theme';
 
 interface TaskCardProps {
   task: Task;
@@ -13,8 +14,51 @@ interface TaskCardProps {
 }
 
 export default memo(function TaskCard({ task, onToggle, onPress, projectColor }: TaskCardProps) {
+  const c = useTheme();
   const done = task.status === 'done';
   const overdue = !done && !!task.due_date && isOverdue(task.due_date);
+
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 12,
+    },
+    content: {
+      flex: 1,
+    },
+    title: {
+      fontSize: 16,
+    },
+    titleActive: {
+      color: c.text,
+    },
+    titleDone: {
+      textDecorationLine: 'line-through',
+      color: c.textPlaceholder,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 2,
+    },
+    dueDate: {
+      fontSize: 12,
+      fontWeight: '500',
+    },
+    dueDateOverdue: {
+      color: c.danger,
+    },
+    dueDateNormal: {
+      color: c.textPlaceholder,
+    },
+    priority: {
+      fontSize: 12,
+      fontWeight: '500',
+    },
+  });
 
   return (
     <TouchableOpacity
@@ -49,46 +93,4 @@ export default memo(function TaskCard({ task, onToggle, onPress, projectColor }:
       </View>
     </TouchableOpacity>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-  },
-  titleActive: {
-    color: '#0f172a',
-  },
-  titleDone: {
-    textDecorationLine: 'line-through',
-    color: '#94a3b8',
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 2,
-  },
-  dueDate: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  dueDateOverdue: {
-    color: '#ef4444',
-  },
-  dueDateNormal: {
-    color: '#94a3b8',
-  },
-  priority: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
 });

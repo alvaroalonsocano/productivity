@@ -7,18 +7,21 @@ import TasksStack from './TasksStack';
 import HabitsStack from './HabitsStack';
 import JournalStack from './JournalStack';
 import SettingsStack from './SettingsStack';
+import { useTheme } from '@/lib/theme';
 
 const Tab = createBottomTabNavigator<AppTabParamList>();
 
 export default function AppTabs() {
+  const c = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#3b82f6',
-        tabBarInactiveTintColor: '#94a3b8',
+        tabBarActiveTintColor: c.primary,
+        tabBarInactiveTintColor: c.textPlaceholder,
         tabBarStyle: {
-          borderTopColor: '#e2e8f0',
+          backgroundColor: c.tabBar,
+          borderTopColor: c.tabBorder,
           paddingBottom: 4,
         },
         tabBarIcon: ({ color, size, focused }) => {

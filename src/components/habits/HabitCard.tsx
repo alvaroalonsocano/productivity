@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { Habit, HabitLog } from '@/types';
 import { computeStreak } from '@/utils/streakUtils';
 import { format } from 'date-fns';
+import { useTheme } from '@/lib/theme';
 
 interface HabitCardProps {
   habit: Habit;
@@ -13,8 +14,63 @@ interface HabitCardProps {
 }
 
 export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, onPress }: HabitCardProps) {
+  const c = useTheme();
   const isCompleted = logs.some((l) => l.habit_id === habit.id && l.log_date === selectedDate);
   const streak = computeStreak(habit, logs.filter((l) => l.habit_id === habit.id));
+
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+      paddingVertical: 12,
+    },
+    iconContainer: {
+      width: 48,
+      height: 48,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    icon: {
+      fontSize: 24,
+    },
+    info: {
+      flex: 1,
+    },
+    name: {
+      fontWeight: '600',
+      color: c.text,
+      fontSize: 16,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 2,
+    },
+    streakText: {
+      fontSize: 12,
+      color: '#f97316',
+      fontWeight: '500',
+    },
+    rateText: {
+      fontSize: 12,
+      color: c.textPlaceholder,
+    },
+    checkButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 9999,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+    },
+    checkmark: {
+      color: '#ffffff',
+      fontSize: 18,
+    },
+  });
 
   return (
     <TouchableOpacity
@@ -47,7 +103,7 @@ export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, on
         style={[
           styles.checkButton,
           {
-            borderColor: isCompleted ? habit.color : '#e2e8f0',
+            borderColor: isCompleted ? habit.color : c.borderStrong,
             backgroundColor: isCompleted ? habit.color : 'transparent',
           },
         ]}
@@ -56,58 +112,4 @@ export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, on
       </TouchableOpacity>
     </TouchableOpacity>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    paddingVertical: 12,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 24,
-  },
-  info: {
-    flex: 1,
-  },
-  name: {
-    fontWeight: '600',
-    color: '#0f172a',
-    fontSize: 16,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 2,
-  },
-  streakText: {
-    fontSize: 12,
-    color: '#f97316',
-    fontWeight: '500',
-  },
-  rateText: {
-    fontSize: 12,
-    color: '#94a3b8',
-  },
-  checkButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-  },
-  checkmark: {
-    color: '#ffffff',
-    fontSize: 18,
-  },
 });

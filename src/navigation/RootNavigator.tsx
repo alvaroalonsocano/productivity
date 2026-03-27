@@ -5,16 +5,18 @@ import { useAuthStore } from '@/store/authStore';
 import { useAuthListener } from '@/hooks/useAuth';
 import AuthStack from './AuthStack';
 import AppTabs from './AppTabs';
+import { useTheme } from '@/lib/theme';
 
 export default function RootNavigator() {
   useAuthListener();
+  const c = useTheme();
 
   const { session, isLoading } = useAuthStore();
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+      <View style={[styles.loadingContainer, { backgroundColor: c.card }]}>
+        <ActivityIndicator size="large" color={c.primary} />
       </View>
     );
   }
@@ -31,6 +33,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
   },
 });

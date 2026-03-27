@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, type TouchableOpacityProps } from 'react-native';
+import { useTheme } from '@/lib/theme';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
@@ -22,7 +23,22 @@ export default function Button({
   style,
   ...rest
 }: ButtonProps) {
+  const c = useTheme();
   const isDisabled = disabled || loading;
+
+  const variantContainer: Record<Variant, object> = {
+    primary: { backgroundColor: c.primaryDark },
+    secondary: { backgroundColor: c.cardAlt },
+    ghost: { borderWidth: 1, borderColor: c.borderStrong },
+    danger: { backgroundColor: c.danger },
+  };
+
+  const variantText: Record<Variant, object> = {
+    primary: { color: '#ffffff', fontWeight: 'bold' },
+    secondary: { color: c.cardAlt, fontWeight: '600' },
+    ghost: { color: c.cardAlt, fontWeight: '600' },
+    danger: { color: '#ffffff', fontWeight: 'bold' },
+  };
 
   const containerStyle = [
     styles.base,
@@ -45,7 +61,7 @@ export default function Button({
       style={containerStyle}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? 'white' : '#3b82f6'} />
+        <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? 'white' : c.primary} />
       ) : (
         <Text style={textStyle}>{label}</Text>
       )}
@@ -65,20 +81,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 });
-
-const variantContainer: Record<Variant, object> = {
-  primary: { backgroundColor: '#2563eb' },
-  secondary: { backgroundColor: '#f1f5f9' },
-  ghost: { borderWidth: 1, borderColor: '#e2e8f0' },
-  danger: { backgroundColor: '#ef4444' },
-};
-
-const variantText: Record<Variant, object> = {
-  primary: { color: '#ffffff', fontWeight: 'bold' },
-  secondary: { color: '#334155', fontWeight: '600' },
-  ghost: { color: '#334155', fontWeight: '600' },
-  danger: { color: '#ffffff', fontWeight: 'bold' },
-};
 
 const sizeContainer: Record<Size, object> = {
   sm: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 12 },

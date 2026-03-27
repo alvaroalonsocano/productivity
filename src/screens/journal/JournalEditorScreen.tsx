@@ -11,6 +11,7 @@ import { useJournalEntryByDate, useUpsertJournalEntry } from '@/hooks/useJournal
 import MoodPicker from '@/components/journal/MoodPicker';
 import { toDateString, formatFullDate } from '@/utils/dateUtils';
 import type { Mood } from '@/types';
+import { useTheme } from '@/lib/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<JournalStackParamList, 'JournalEditor'>;
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export default function JournalEditorScreen({ navigation, route }: Props) {
+  const c = useTheme();
   const params = route.params;
   const date = params?.date ?? toDateString(new Date());
 
@@ -76,10 +78,103 @@ export default function JournalEditorScreen({ navigation, route }: Props) {
     navigation.goBack();
   };
 
+  const styles = StyleSheet.create({
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.card,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: c.card,
+    },
+    flex1: {
+      flex: 1,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    headerCenter: {
+      alignItems: 'center',
+    },
+    headerDate: {
+      fontWeight: '600',
+      color: c.text,
+      fontSize: 14,
+    },
+    savedText: {
+      fontSize: 12,
+      color: c.textPlaceholder,
+    },
+    saveText: {
+      color: c.primaryDark,
+      fontWeight: '600',
+      fontSize: 14,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 20,
+    },
+    moodSection: {
+      marginTop: 16,
+      marginBottom: 20,
+    },
+    sectionLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.textMuted,
+      marginBottom: 12,
+    },
+    titleInput: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: c.text,
+      marginBottom: 8,
+    },
+    contentInput: {
+      fontSize: 16,
+      color: c.cardAlt,
+      lineHeight: 28,
+      minHeight: 192,
+    },
+    tagsSection: {
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    tagsInput: {
+      backgroundColor: c.bg,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      color: c.cardAlt,
+      fontSize: 14,
+    },
+    footer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      paddingHorizontal: 20,
+      paddingVertical: 8,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+    },
+    wordCount: {
+      fontSize: 12,
+      color: c.textPlaceholder,
+    },
+  });
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator color="#3b82f6" />
+        <ActivityIndicator color={c.primary} />
       </SafeAreaView>
     );
   }
@@ -90,7 +185,7 @@ export default function JournalEditorScreen({ navigation, route }: Props) {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleClose}>
-            <Ionicons name="close" size={24} color="#64748b" />
+            <Ionicons name="close" size={24} color={c.textMuted} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.headerDate}>
@@ -102,7 +197,7 @@ export default function JournalEditorScreen({ navigation, route }: Props) {
           </View>
           <TouchableOpacity onPress={save} disabled={upsert.isPending}>
             {upsert.isPending ? (
-              <ActivityIndicator size="small" color="#3b82f6" />
+              <ActivityIndicator size="small" color={c.primary} />
             ) : (
               <Text style={styles.saveText}>Guardar</Text>
             )}
@@ -121,7 +216,7 @@ export default function JournalEditorScreen({ navigation, route }: Props) {
             value={title}
             onChangeText={setTitle}
             placeholder="Título (opcional)"
-            placeholderTextColor="#cbd5e1"
+            placeholderTextColor={c.borderStrong}
             style={styles.titleInput}
           />
 
@@ -130,7 +225,7 @@ export default function JournalEditorScreen({ navigation, route }: Props) {
             value={content}
             onChangeText={setContent}
             placeholder="¿Qué ha pasado hoy? ¿Cómo te has sentido?..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={c.textPlaceholder}
             multiline
             textAlignVertical="top"
             style={styles.contentInput}
@@ -144,7 +239,7 @@ export default function JournalEditorScreen({ navigation, route }: Props) {
               value={tags}
               onChangeText={setTags}
               placeholder="trabajo, familia, ejercicio..."
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={c.textPlaceholder}
               style={styles.tagsInput}
             />
           </View>
@@ -158,96 +253,3 @@ export default function JournalEditorScreen({ navigation, route }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  flex1: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  headerCenter: {
-    alignItems: 'center',
-  },
-  headerDate: {
-    fontWeight: '600',
-    color: '#0f172a',
-    fontSize: 14,
-  },
-  savedText: {
-    fontSize: 12,
-    color: '#94a3b8',
-  },
-  saveText: {
-    color: '#2563eb',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  moodSection: {
-    marginTop: 16,
-    marginBottom: 20,
-  },
-  sectionLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-    marginBottom: 12,
-  },
-  titleInput: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0f172a',
-    marginBottom: 8,
-  },
-  contentInput: {
-    fontSize: 16,
-    color: '#334155',
-    lineHeight: 28,
-    minHeight: 192,
-  },
-  tagsSection: {
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  tagsInput: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: '#334155',
-    fontSize: 14,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
-  },
-  wordCount: {
-    fontSize: 12,
-    color: '#94a3b8',
-  },
-});

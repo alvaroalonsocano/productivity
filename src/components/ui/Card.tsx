@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, type ViewProps } from 'react-native';
+import { useTheme } from '@/lib/theme';
 
 interface CardProps extends ViewProps {
   children: React.ReactNode;
@@ -14,10 +15,19 @@ const paddingMap: Record<string, number> = {
 };
 
 export default function Card({ children, padding = 'md', style, ...rest }: CardProps) {
+  const c = useTheme();
   return (
     <View
       style={[
-        styles.card,
+        {
+          backgroundColor: c.card,
+          borderRadius: 16,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
+        },
         padding !== 'none' && { padding: paddingMap[padding] },
         style,
       ]}
@@ -27,15 +37,3 @@ export default function Card({ children, padding = 'md', style, ...rest }: CardP
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-});

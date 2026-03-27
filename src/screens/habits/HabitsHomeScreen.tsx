@@ -11,10 +11,12 @@ import HabitCard from '@/components/habits/HabitCard';
 import EmptyState from '@/components/ui/EmptyState';
 import { toDateString, formatDate, getWeekDates } from '@/utils/dateUtils';
 import { DAY_NAMES } from '@/lib/constants';
+import { useTheme } from '@/lib/theme';
 
 type Props = { navigation: NativeStackNavigationProp<HabitsStackParamList, 'HabitsHome'> };
 
 export default function HabitsHomeScreen({ navigation }: Props) {
+  const c = useTheme();
   const today = toDateString(new Date());
   const [selectedDate, setSelectedDate] = useState(today);
 
@@ -27,6 +29,100 @@ export default function HabitsHomeScreen({ navigation }: Props) {
   // Habits scheduled for selected date
   const dayOfWeek = new Date(selectedDate + 'T12:00:00').getDay();
   const todayHabits = habits.filter((h) => h.target_days.includes(dayOfWeek));
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.bg,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 12,
+      backgroundColor: c.card,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: c.text,
+    },
+    dateScroll: {
+      marginTop: 12,
+      marginHorizontal: -4,
+    },
+    datePill: {
+      marginHorizontal: 4,
+      width: 48,
+      paddingVertical: 8,
+      borderRadius: 16,
+      alignItems: 'center',
+    },
+    datePillSelected: {
+      backgroundColor: c.primaryDark,
+    },
+    datePillInactive: {
+      backgroundColor: 'transparent',
+    },
+    dateDayName: {
+      fontSize: 12,
+    },
+    dateDayNameSelected: {
+      color: c.primaryBorder,
+    },
+    dateDayNameInactive: {
+      color: c.textPlaceholder,
+    },
+    dateDayNum: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginTop: 2,
+    },
+    dateDayNumSelected: {
+      color: '#ffffff',
+    },
+    dateDayNumToday: {
+      color: c.primaryDark,
+    },
+    dateDayNumDefault: {
+      color: c.cardAlt,
+    },
+    listHeader: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.textPlaceholder,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    emptyText: {
+      color: c.textPlaceholder,
+      textAlign: 'center',
+      marginTop: 32,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: c.border,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 24,
+      right: 24,
+      backgroundColor: c.primaryDark,
+      width: 56,
+      height: 56,
+      borderRadius: 9999,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -107,97 +203,3 @@ export default function HabitsHomeScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  dateScroll: {
-    marginTop: 12,
-    marginHorizontal: -4,
-  },
-  datePill: {
-    marginHorizontal: 4,
-    width: 48,
-    paddingVertical: 8,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  datePillSelected: {
-    backgroundColor: '#2563eb',
-  },
-  datePillInactive: {
-    backgroundColor: 'transparent',
-  },
-  dateDayName: {
-    fontSize: 12,
-  },
-  dateDayNameSelected: {
-    color: '#bfdbfe',
-  },
-  dateDayNameInactive: {
-    color: '#94a3b8',
-  },
-  dateDayNum: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 2,
-  },
-  dateDayNumSelected: {
-    color: '#ffffff',
-  },
-  dateDayNumToday: {
-    color: '#2563eb',
-  },
-  dateDayNumDefault: {
-    color: '#334155',
-  },
-  listHeader: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyText: {
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginTop: 32,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f1f5f9',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    backgroundColor: '#2563eb',
-    width: 56,
-    height: 56,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-});

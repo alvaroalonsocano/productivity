@@ -8,10 +8,12 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { SettingsStackParamList } from '@/navigation/types';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/auth.service';
+import { useTheme } from '@/lib/theme';
 
 type Props = { navigation: NativeStackNavigationProp<SettingsStackParamList, 'Profile'> };
 
 export default function ProfileScreen({ navigation }: Props) {
+  const c = useTheme();
   const { profile, user, setProfile } = useAuthStore();
   const [displayName, setDisplayName] = useState(profile?.display_name ?? '');
   const [loading, setLoading] = useState(false);
@@ -32,17 +34,91 @@ export default function ProfileScreen({ navigation }: Props) {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.card,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    headerTitle: {
+      fontWeight: 'bold',
+      color: c.text,
+      fontSize: 16,
+    },
+    saveText: {
+      color: c.primaryDark,
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 20,
+    },
+    avatarContainer: {
+      alignItems: 'center',
+      marginTop: 32,
+      marginBottom: 32,
+    },
+    avatar: {
+      width: 96,
+      height: 96,
+      borderRadius: 9999,
+      backgroundColor: c.primaryBg,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarText: {
+      fontSize: 36,
+      fontWeight: 'bold',
+      color: c.primaryDark,
+    },
+    fieldLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.textMuted,
+      marginBottom: 8,
+    },
+    nameInput: {
+      backgroundColor: c.cardAlt,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      color: c.text,
+      fontSize: 16,
+      marginBottom: 20,
+    },
+    emailContainer: {
+      backgroundColor: c.cardAlt,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      marginBottom: 20,
+    },
+    emailText: {
+      color: c.textPlaceholder,
+      fontSize: 16,
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#64748b" />
+          <Ionicons name="arrow-back" size={24} color={c.textMuted} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Mi perfil</Text>
         <TouchableOpacity onPress={handleSave} disabled={loading}>
           {loading ? (
-            <ActivityIndicator color="#3b82f6" />
+            <ActivityIndicator color={c.primary} />
           ) : (
             <Text style={styles.saveText}>Guardar</Text>
           )}
@@ -67,7 +143,7 @@ export default function ProfileScreen({ navigation }: Props) {
           value={displayName}
           onChangeText={setDisplayName}
           placeholder="Tu nombre"
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor={c.textPlaceholder}
           autoCapitalize="words"
           style={styles.nameInput}
         />
@@ -81,77 +157,3 @@ export default function ProfileScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  headerTitle: {
-    fontWeight: 'bold',
-    color: '#0f172a',
-    fontSize: 16,
-  },
-  saveText: {
-    color: '#2563eb',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginTop: 32,
-    marginBottom: 32,
-  },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 9999,
-    backgroundColor: '#dbeafe',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#2563eb',
-  },
-  fieldLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#475569',
-    marginBottom: 8,
-  },
-  nameInput: {
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: '#0f172a',
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  emailContainer: {
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 20,
-  },
-  emailText: {
-    color: '#94a3b8',
-    fontSize: 16,
-  },
-});
