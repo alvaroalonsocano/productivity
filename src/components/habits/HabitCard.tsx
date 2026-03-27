@@ -1,9 +1,15 @@
 import React, { memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+} from 'react-native-reanimated';
 import type { Habit, HabitLog } from '@/types';
 import { computeStreak } from '@/utils/streakUtils';
-import { format } from 'date-fns';
 import { useTheme } from '@/lib/theme';
+import { useHaptics } from '@/hooks/useHaptics';
 
 interface HabitCardProps {
   habit: Habit;
@@ -15,8 +21,30 @@ interface HabitCardProps {
 
 export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, onPress }: HabitCardProps) {
   const c = useTheme();
+  const haptics = useHaptics();
   const isCompleted = logs.some((l) => l.habit_id === habit.id && l.log_date === selectedDate);
   const streak = computeStreak(habit, logs.filter((l) => l.habit_id === habit.id));
+
+  const checkScale = useSharedValue(1);
+  const checkAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkScale.value }],
+  }));
+
+  const handleToggle = () => {
+    if (!isCompleted) {
+      haptics.success();
+      checkScale.value = withSequence(
+        withSpring(1.3, { damping: 8, stiffness: 600 }),
+        withSpring(1, { damping: 10, stiffness: 400 })
+      );
+    } else {
+      haptics.light();
+      checkScale.value = withSpring(0.9, { damping: 10, stiffness: 400 }, () => {
+        checkScale.value = withSpring(1);
+      });
+    }
+    onToggle(habit.id, selectedDate, !isCompleted);
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -73,15 +101,8 @@ export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, on
   });
 
   return (
-    <TouchableOpacity
-      onPress={() => onPress(habit.id)}
-      style={styles.container}
-      activeOpacity={0.7}
-    >
-      {/* Icon + color */}
-      <View
-        style={[styles.iconContainer, { backgroundColor: habit.color + '20' }]}
-      >
+    <TouchableOpacity onPress={() => onPress(habit.id)} style={styles.container} activeOpacity={0.7}>
+      <View style={[styles.iconContainer, { backgroundColor: habit.color + '20' }]}>
         <Text style={styles.icon}>{habit.icon ?? '✨'}</Text>
       </View>
 
@@ -97,19 +118,20 @@ export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, on
         </View>
       </View>
 
-      {/* Check-in button */}
-      <TouchableOpacity
-        onPress={() => onToggle(habit.id, selectedDate, !isCompleted)}
-        style={[
-          styles.checkButton,
-          {
-            borderColor: isCompleted ? habit.color : c.borderStrong,
-            backgroundColor: isCompleted ? habit.color : 'transparent',
-          },
-        ]}
-      >
-        {isCompleted && <Text style={styles.checkmark}>✓</Text>}
-      </TouchableOpacity>
+      <Animated.View style={checkAnimatedStyle}>
+        <TouchableOpacity
+          onPress={handleToggle}
+          style={[
+            styles.checkButton,
+            {
+              borderColor: isCompleted ? habit.color : c.borderStrong,
+              backgroundColor: isCompleted ? habit.color : 'transparent',
+            },
+          ]}
+        >
+          {isCompleted && <Text style={styles.checkmark}>✓</Text>}
+        </TouchableOpacity>
+      </Animated.View>
     </TouchableOpacity>
   );
 });

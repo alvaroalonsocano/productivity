@@ -8,6 +8,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { HabitsStackParamList } from '@/navigation/types';
 import { useHabits, useRecentLogs, useToggleHabitLog } from '@/hooks/useHabits';
 import HabitCard from '@/components/habits/HabitCard';
+import FadeInView from '@/components/ui/FadeInView';
 import EmptyState from '@/components/ui/EmptyState';
 import { toDateString, formatDate, getWeekDates } from '@/utils/dateUtils';
 import { DAY_NAMES } from '@/lib/constants';
@@ -181,14 +182,16 @@ export default function HabitsHomeScreen({ navigation }: Props) {
             <Text style={styles.emptyText}>No hay hábitos programados para este día</Text>
           }
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          renderItem={({ item }) => (
-            <HabitCard
-              habit={item}
-              logs={logs}
-              selectedDate={selectedDate}
-              onToggle={(habitId, date, checked) => toggleLog.mutate({ habitId, date, checked })}
-              onPress={(id) => navigation.navigate('HabitDetail', { habitId: id })}
-            />
+          renderItem={({ item, index }) => (
+            <FadeInView index={index}>
+              <HabitCard
+                habit={item}
+                logs={logs}
+                selectedDate={selectedDate}
+                onToggle={(habitId, date, checked) => toggleLog.mutate({ habitId, date, checked })}
+                onPress={(id) => navigation.navigate('HabitDetail', { habitId: id })}
+              />
+            </FadeInView>
           )}
         />
       )}

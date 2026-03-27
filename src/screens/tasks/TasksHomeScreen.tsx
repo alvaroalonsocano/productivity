@@ -10,6 +10,7 @@ import { useTasks, useProjects, useToggleTask } from '@/hooks/useTasks';
 import { useAuthStore } from '@/store/authStore';
 import TaskCard from '@/components/tasks/TaskCard';
 import EmptyState from '@/components/ui/EmptyState';
+import FadeInView from '@/components/ui/FadeInView';
 import { isOverdue, isDueToday } from '@/utils/dateUtils';
 import type { Task } from '@/types';
 import { useTheme } from '@/lib/theme';
@@ -244,13 +245,15 @@ export default function TasksHomeScreen({ navigation }: Props) {
             ItemSeparatorComponent={() => (
               <View style={styles.separator} />
             )}
-            renderItem={({ item }) => (
-              <TaskCard
-                task={item}
-                onToggle={(id, done) => toggleTask.mutate({ id, done })}
-                onPress={(id) => navigation.navigate('TaskDetail', { taskId: id })}
-                projectColor={getProjectColor(item.project_id)}
-              />
+            renderItem={({ item, index }) => (
+              <FadeInView index={index}>
+                <TaskCard
+                  task={item}
+                  onToggle={(id, done) => toggleTask.mutate({ id, done })}
+                  onPress={(id) => navigation.navigate('TaskDetail', { taskId: id })}
+                  projectColor={getProjectColor(item.project_id)}
+                />
+              </FadeInView>
             )}
           />
         )}

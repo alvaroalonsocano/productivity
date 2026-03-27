@@ -1,17 +1,21 @@
 import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, type TouchableOpacityProps } from 'react-native';
+import { Text, ActivityIndicator, StyleSheet, Pressable, type PressableProps } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/lib/theme';
+import { useHaptics } from '@/hooks/useHaptics';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends TouchableOpacityProps {
+interface ButtonProps extends PressableProps {
   label: string;
   variant?: Variant;
   size?: Size;
   loading?: boolean;
   fullWidth?: boolean;
 }
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function Button({
   label,
@@ -21,10 +25,17 @@ export default function Button({
   fullWidth = false,
   disabled,
   style,
+  onPress,
   ...rest
 }: ButtonProps) {
   const c = useTheme();
+  const haptics = useHaptics();
   const isDisabled = disabled || loading;
+
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   const variantContainer: Record<Variant, object> = {
     primary: { backgroundColor: c.primaryDark },
@@ -35,8 +46,8 @@ export default function Button({
 
   const variantText: Record<Variant, object> = {
     primary: { color: '#ffffff', fontWeight: 'bold' },
-    secondary: { color: c.cardAlt, fontWeight: '600' },
-    ghost: { color: c.cardAlt, fontWeight: '600' },
+    secondary: { color: c.text, fontWeight: '600' },
+    ghost: { color: c.text, fontWeight: '600' },
     danger: { color: '#ffffff', fontWeight: 'bold' },
   };
 
@@ -46,40 +57,35 @@ export default function Button({
     sizeContainer[size],
     fullWidth && styles.fullWidth,
     isDisabled && styles.disabled,
+    animatedStyle,
     style,
   ];
 
-  const textStyle = [
-    variantText[variant],
-    sizeText[size],
-  ];
-
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       {...rest}
       disabled={isDisabled}
       style={containerStyle}
+      onPressIn={() => { scale.value = withSpring(0.96, { damping: 15, stiffness: 400 }); }}
+      onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 400 }); }}
+      onPress={(e) => {
+        haptics.light();
+        onPress?.(e);
+      }}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? 'white' : c.primary} />
       ) : (
-        <Text style={textStyle}>{label}</Text>
+        <Text style={[variantText[variant], sizeText[size]]}>{label}</Text>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
-  base: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fullWidth: {
-    width: '100%',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
+  base: { alignItems: 'center', justifyContent: 'center' },
+  fullWidth: { width: '100%' },
+  disabled: { opacity: 0.5 },
 });
 
 const sizeContainer: Record<Size, object> = {
