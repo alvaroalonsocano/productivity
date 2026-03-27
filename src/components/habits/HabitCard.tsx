@@ -39,9 +39,10 @@ export default memo(function HabitCard({ habit, logs, selectedDate, onToggle, on
       );
     } else {
       haptics.light();
-      checkScale.value = withSpring(0.9, { damping: 10, stiffness: 400 }, () => {
-        checkScale.value = withSpring(1);
-      });
+      checkScale.value = withSequence(
+        withSpring(0.9, { damping: 10, stiffness: 400 }),
+        withSpring(1, { damping: 10, stiffness: 300 })
+      );
     }
     onToggle(habit.id, selectedDate, !isCompleted);
   };

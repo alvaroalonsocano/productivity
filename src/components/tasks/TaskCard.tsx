@@ -4,6 +4,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withSequence,
 } from 'react-native-reanimated';
 import type { Task } from '@/types';
 import { PRIORITY_COLORS, PRIORITY_LABELS } from '@/lib/constants';
@@ -34,9 +35,10 @@ export default memo(function TaskCard({ task, onToggle, onPress, projectColor }:
 
   const handleToggle = () => {
     haptics.light();
-    scale.value = withSpring(0.96, { damping: 12, stiffness: 500 }, () => {
-      scale.value = withSpring(1, { damping: 12, stiffness: 300 });
-    });
+    scale.value = withSequence(
+      withSpring(0.96, { damping: 12, stiffness: 500 }),
+      withSpring(1, { damping: 12, stiffness: 300 })
+    );
     onToggle(task.id, !done);
   };
 
