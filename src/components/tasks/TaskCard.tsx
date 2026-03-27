@@ -20,8 +20,6 @@ interface TaskCardProps {
   projectColor?: string;
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 export default memo(function TaskCard({ task, onToggle, onPress, projectColor }: TaskCardProps) {
   const c = useTheme();
   const haptics = useHaptics();
@@ -61,34 +59,35 @@ export default memo(function TaskCard({ task, onToggle, onPress, projectColor }:
   });
 
   return (
-    <AnimatedPressable
+    <Pressable
       onPress={() => { haptics.selection(); onPress(task.id); }}
       onPressIn={() => { scale.value = withSpring(0.97, { damping: 15, stiffness: 400 }); }}
       onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 400 }); }}
-      style={[styles.container, animatedStyle]}
     >
-      <Checkbox
-        checked={done}
-        onPress={handleToggle}
-        color={projectColor ?? PRIORITY_COLORS[task.priority]}
-      />
-      <View style={styles.content}>
-        <Text style={[styles.title, done ? styles.titleDone : styles.titleActive]} numberOfLines={2}>
-          {task.title}
-        </Text>
-        <View style={styles.metaRow}>
-          {task.due_date && (
-            <Text style={[styles.dueDate, overdue ? styles.dueDateOverdue : styles.dueDateNormal]}>
-              {overdue ? '⚠ ' : ''}{formatDate(task.due_date)}
-            </Text>
-          )}
-          {task.priority !== 'none' && (
-            <Text style={[styles.priority, { color: PRIORITY_COLORS[task.priority] }]}>
-              {PRIORITY_LABELS[task.priority]}
-            </Text>
-          )}
+      <Animated.View style={[styles.container, animatedStyle]}>
+        <Checkbox
+          checked={done}
+          onPress={handleToggle}
+          color={projectColor ?? PRIORITY_COLORS[task.priority]}
+        />
+        <View style={styles.content}>
+          <Text style={[styles.title, done ? styles.titleDone : styles.titleActive]} numberOfLines={2}>
+            {task.title}
+          </Text>
+          <View style={styles.metaRow}>
+            {task.due_date && (
+              <Text style={[styles.dueDate, overdue ? styles.dueDateOverdue : styles.dueDateNormal]}>
+                {overdue ? '⚠ ' : ''}{formatDate(task.due_date)}
+              </Text>
+            )}
+            {task.priority !== 'none' && (
+              <Text style={[styles.priority, { color: PRIORITY_COLORS[task.priority] }]}>
+                {PRIORITY_LABELS[task.priority]}
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
-    </AnimatedPressable>
+      </Animated.View>
+    </Pressable>
   );
 });

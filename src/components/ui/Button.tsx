@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, ActivityIndicator, StyleSheet, Pressable, type PressableProps } from 'react-native';
+import { Text, ActivityIndicator, StyleSheet, Pressable, type PressableProps, View } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/lib/theme';
 import { useHaptics } from '@/hooks/useHaptics';
@@ -14,8 +14,6 @@ interface ButtonProps extends PressableProps {
   loading?: boolean;
   fullWidth?: boolean;
 }
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function Button({
   label,
@@ -57,28 +55,25 @@ export default function Button({
     sizeContainer[size],
     fullWidth && styles.fullWidth,
     isDisabled && styles.disabled,
-    animatedStyle,
     style,
   ];
 
   return (
-    <AnimatedPressable
+    <Pressable
       {...rest}
       disabled={isDisabled}
-      style={containerStyle}
       onPressIn={() => { scale.value = withSpring(0.96, { damping: 15, stiffness: 400 }); }}
       onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 400 }); }}
-      onPress={(e) => {
-        haptics.light();
-        onPress?.(e);
-      }}
+      onPress={(e) => { haptics.light(); onPress?.(e); }}
     >
-      {loading ? (
-        <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? 'white' : c.primary} />
-      ) : (
-        <Text style={[variantText[variant], sizeText[size]]}>{label}</Text>
-      )}
-    </AnimatedPressable>
+      <Animated.View style={[containerStyle, animatedStyle]}>
+        {loading ? (
+          <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? 'white' : c.primary} />
+        ) : (
+          <Text style={[variantText[variant], sizeText[size]]}>{label}</Text>
+        )}
+      </Animated.View>
+    </Pressable>
   );
 }
 
