@@ -30,7 +30,12 @@ export type SettingsStackParamList = {
   Profile: undefined;
 };
 
+export type DashboardStackParamList = {
+  Dashboard: undefined;
+};
+
 export type AppTabParamList = {
+  Dashboard: NavigatorScreenParams<DashboardStackParamList>;
   Tasks: NavigatorScreenParams<TasksStackParamList>;
   Habits: NavigatorScreenParams<HabitsStackParamList>;
   Journal: NavigatorScreenParams<JournalStackParamList>;
