@@ -28,6 +28,7 @@ export type JournalStackParamList = {
 export type SettingsStackParamList = {
   Settings: undefined;
   Profile: undefined;
+  Stats: undefined;
 };
 
 export type DashboardStackParamList = {

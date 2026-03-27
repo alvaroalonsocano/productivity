@@ -237,6 +237,21 @@ export default function SettingsScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
+        {/* Stats */}
+        <Text style={styles.sectionHeader}>
+          Datos
+        </Text>
+        <View style={styles.card}>
+          <SettingRow
+            icon="bar-chart-outline"
+            label="Estadísticas"
+            sublabel="Tareas, hábitos y estado de ánimo"
+            onPress={() => navigation.navigate('Stats')}
+            c={c}
+            styles={styles}
+          />
+        </View>
+
         {/* App */}
         <Text style={styles.sectionHeader}>
           Aplicación
