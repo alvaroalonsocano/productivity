@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskService, projectService } from '@/services/task.service';
 import { useAuthStore } from '@/store/authStore';
+import { useOfflineStore } from '@/store/offlineStore';
 import type { CreateTaskInput, UpdateTaskInput, CreateProjectInput } from '@/types';
 
 export function useTasks() {
@@ -83,9 +84,15 @@ export function useUpdateTask() {
 export function useToggleTask() {
   const qc = useQueryClient();
   const userId = useAuthStore((s) => s.user?.id)!;
+  const { isOnline, enqueue } = useOfflineStore();
   return useMutation({
-    mutationFn: ({ id, done }: { id: string; done: boolean }) =>
-      done ? taskService.completeTask(id) : taskService.uncompleteTask(id),
+    mutationFn: ({ id, done }: { id: string; done: boolean }) => {
+      if (!isOnline) {
+        enqueue({ type: 'toggleTask', payload: { id, done } });
+        return Promise.resolve(null as any);
+      }
+      return done ? taskService.completeTask(id) : taskService.uncompleteTask(id);
+    },
     onMutate: async ({ id, done }) => {
       await qc.cancelQueries({ queryKey: ['tasks', userId] });
       const prev = qc.getQueryData(['tasks', userId]);
@@ -99,7 +106,7 @@ export function useToggleTask() {
       return { prev };
     },
     onError: (_, __, ctx) => qc.setQueryData(['tasks', userId], ctx?.prev),
-    onSettled: () => qc.invalidateQueries({ queryKey: ['tasks', userId] }),
+    onSettled: () => { if (isOnline) qc.invalidateQueries({ queryKey: ['tasks', userId] }); },
   });
 }
 

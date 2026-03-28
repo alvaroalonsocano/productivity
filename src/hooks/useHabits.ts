@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { habitService } from '@/services/habit.service';
 import { useAuthStore } from '@/store/authStore';
+import { useOfflineStore } from '@/store/offlineStore';
 import { subDays, format } from 'date-fns';
 import type { CreateHabitInput, UpdateHabitInput } from '@/types';
 
@@ -72,12 +73,22 @@ export function useToggleHabitLog() {
   const qc = useQueryClient();
   const userId = useAuthStore((s) => s.user?.id)!;
   const today = format(new Date(), 'yyyy-MM-dd');
+  const { isOnline, enqueue } = useOfflineStore();
 
   return useMutation({
-    mutationFn: ({ habitId, date, checked }: { habitId: string; date: string; checked: boolean }) =>
-      checked
+    mutationFn: ({ habitId, date, checked }: { habitId: string; date: string; checked: boolean }) => {
+      if (!isOnline) {
+        if (checked) {
+          enqueue({ type: 'logHabit', payload: { habitId, userId, date } });
+        } else {
+          enqueue({ type: 'unlogHabit', payload: { habitId, date } });
+        }
+        return Promise.resolve(null as any);
+      }
+      return checked
         ? habitService.logHabit(habitId, userId, date)
-        : habitService.unlogHabit(habitId, date),
+        : habitService.unlogHabit(habitId, date);
+    },
     onMutate: async ({ habitId, date, checked }) => {
       const key = ['habit-logs-today', userId, today];
       await qc.cancelQueries({ queryKey: key });
@@ -98,8 +109,10 @@ export function useToggleHabitLog() {
       qc.setQueryData(['habit-logs-today', userId, today], ctx?.prev);
     },
     onSettled: (_, __, { habitId }) => {
-      qc.invalidateQueries({ queryKey: ['habit-logs-today', userId, today] });
-      qc.invalidateQueries({ queryKey: ['habit-logs', habitId] });
+      if (isOnline) {
+        qc.invalidateQueries({ queryKey: ['habit-logs-today', userId, today] });
+        qc.invalidateQueries({ queryKey: ['habit-logs', habitId] });
+      }
     },
   });
 }
