@@ -24,6 +24,7 @@ export interface Task {
   due_date: string | null;
   completed_at: string | null;
   sort_order: number;
+  archived: boolean;
   created_at: string;
   updated_at: string;
 }

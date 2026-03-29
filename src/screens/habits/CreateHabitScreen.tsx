@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   SafeAreaView, Alert, ActivityIndicator, StyleSheet, Switch, Platform,
 } from 'react-native';
+import { z } from 'zod';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { HabitsStackParamList } from '@/navigation/types';
@@ -18,6 +19,21 @@ type Props = { navigation: NativeStackNavigationProp<HabitsStackParamList, 'Crea
 const EMOJIS = ['✨', '💪', '📚', '🧘', '🏃', '💧', '🥗', '😴', '🎯', '🎸', '✍️', '🌿', '🧹', '💊', '🌅'];
 const CATEGORIES = Object.keys(HABIT_CATEGORY_LABELS) as HabitCategory[];
 
+const CreateHabitSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'El nombre no puede estar vacío')
+    .max(100, 'El nombre no puede superar 100 caracteres'),
+  targetDays: z
+    .array(z.number())
+    .min(1, 'Selecciona al menos un día'),
+});
+
+type HabitFormErrors = {
+  name?: string;
+  targetDays?: string;
+};
+
 export default function CreateHabitScreen({ navigation }: Props) {
   const c = useTheme();
   const [name, setName] = useState('');
@@ -28,6 +44,7 @@ export default function CreateHabitScreen({ navigation }: Props) {
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [reminderTime, setReminderTime] = useState(() => { const d = new Date(); d.setHours(9, 0, 0, 0); return d; });
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [errors, setErrors] = useState<HabitFormErrors>({});
 
   const createHabit = useCreateHabit();
 
@@ -51,14 +68,16 @@ export default function CreateHabitScreen({ navigation }: Props) {
   };
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      Alert.alert('Error', 'El nombre no puede estar vacío');
+    const result = CreateHabitSchema.safeParse({ name, targetDays });
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        name: fieldErrors.name?.[0],
+        targetDays: fieldErrors.targetDays?.[0],
+      });
       return;
     }
-    if (targetDays.length === 0) {
-      Alert.alert('Error', 'Selecciona al menos un día');
-      return;
-    }
+    setErrors({});
     try {
       const habit = await createHabit.mutateAsync({
         name: name.trim(),
@@ -142,7 +161,12 @@ export default function CreateHabitScreen({ navigation }: Props) {
       paddingVertical: 14,
       color: c.text,
       fontSize: 16,
-      marginBottom: 20,
+      marginBottom: 4,
+    },
+    errorText: {
+      color: '#E53E3E',
+      fontSize: 12,
+      marginBottom: 16,
     },
     emojiGrid: {
       flexDirection: 'row',
@@ -270,12 +294,13 @@ export default function CreateHabitScreen({ navigation }: Props) {
         <Text style={styles.sectionLabel}>Nombre</Text>
         <TextInput
           value={name}
-          onChangeText={setName}
+          onChangeText={(t) => { setName(t); if (errors.name) setErrors((e) => ({ ...e, name: undefined })); }}
           placeholder="Ej: Meditación, Leer 30 min..."
           placeholderTextColor={c.textPlaceholder}
           autoFocus
-          style={styles.nameInput}
+          style={[styles.nameInput, errors.name ? { borderWidth: 1, borderColor: '#E53E3E' } : undefined]}
         />
+        {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
 
         {/* Icon */}
         <Text style={styles.sectionLabel}>Icono</Text>
@@ -346,7 +371,7 @@ export default function CreateHabitScreen({ navigation }: Props) {
           {DAY_NAMES.map((day, i) => (
             <TouchableOpacity
               key={i}
-              onPress={() => toggleDay(i)}
+              onPress={() => { toggleDay(i); if (errors.targetDays) setErrors((e) => ({ ...e, targetDays: undefined })); }}
               style={[
                 styles.dayButton,
                 { backgroundColor: targetDays.includes(i) ? color : c.cardAlt },
@@ -363,6 +388,7 @@ export default function CreateHabitScreen({ navigation }: Props) {
             </TouchableOpacity>
           ))}
         </View>
+        {errors.targetDays ? <Text style={styles.errorText}>{errors.targetDays}</Text> : null}
 
         {/* Reminder */}
         <Text style={styles.sectionLabel}>Recordatorio</Text>

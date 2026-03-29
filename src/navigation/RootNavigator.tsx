@@ -1,11 +1,18 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { createNavigationContainerRef, NavigationContainer } from '@react-navigation/native';
 import { useAuthStore } from '@/store/authStore';
 import { useAuthListener } from '@/hooks/useAuth';
 import AuthStack from './AuthStack';
 import AppTabs from './AppTabs';
 import { useTheme } from '@/lib/theme';
+import type { AppTabParamList } from './types';
+
+/**
+ * navigationRef — use this to navigate from outside of React components,
+ * e.g. from notification response listeners in App.tsx.
+ */
+export const navigationRef = createNavigationContainerRef<AppTabParamList>();
 
 export default function RootNavigator() {
   useAuthListener();
@@ -22,7 +29,7 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       {session ? <AppTabs /> : <AuthStack />}
     </NavigationContainer>
   );

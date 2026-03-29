@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   SafeAreaView, Alert, ActivityIndicator, StyleSheet,
 } from 'react-native';
+import { z } from 'zod';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -11,6 +12,23 @@ import { useCreateTask, useProjects } from '@/hooks/useTasks';
 import { PRIORITY_COLORS, PRIORITY_LABELS } from '@/lib/constants';
 import type { Priority } from '@/types';
 import { useTheme } from '@/lib/theme';
+
+const CreateTaskSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'El título no puede estar vacío')
+    .max(255, 'El título no puede superar 255 caracteres'),
+  dueDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (usa YYYY-MM-DD)')
+    .optional()
+    .or(z.literal('')),
+});
+
+type FormErrors = {
+  title?: string;
+  dueDate?: string;
+};
 
 type Props = {
   navigation: NativeStackNavigationProp<TasksStackParamList, 'CreateTask'>;
@@ -28,15 +46,22 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
   const [dueDate, setDueDate] = useState(params?.dueDate ?? '');
   const [projectId, setProjectId] = useState(params?.projectId ?? null);
   const [showDesc, setShowDesc] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const { data: projects = [] } = useProjects();
   const createTask = useCreateTask();
 
   const handleSave = async () => {
-    if (!title.trim()) {
-      Alert.alert('Error', 'El título no puede estar vacío');
+    const result = CreateTaskSchema.safeParse({ title, dueDate });
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        title: fieldErrors.title?.[0],
+        dueDate: fieldErrors.dueDate?.[0],
+      });
       return;
     }
+    setErrors({});
     try {
       await createTask.mutateAsync({
         title: title.trim(),
@@ -93,6 +118,11 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
       fontWeight: '600',
       color: c.text,
       marginTop: 20,
+      marginBottom: 4,
+    },
+    errorText: {
+      color: '#E53E3E',
+      fontSize: 12,
       marginBottom: 8,
     },
     addDescRow: {
@@ -176,13 +206,14 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
         {/* Title */}
         <TextInput
           value={title}
-          onChangeText={setTitle}
+          onChangeText={(t) => { setTitle(t); if (errors.title) setErrors((e) => ({ ...e, title: undefined })); }}
           placeholder="¿Qué hay que hacer?"
           placeholderTextColor={c.textPlaceholder}
           autoFocus
           multiline
           style={styles.titleInput}
         />
+        {errors.title ? <Text style={styles.errorText}>{errors.title}</Text> : null}
 
         {/* Description toggle */}
         {!showDesc ? (
@@ -268,11 +299,12 @@ export default function CreateTaskScreen({ navigation, route }: Props) {
         <Text style={styles.sectionLabel}>Fecha límite</Text>
         <TextInput
           value={dueDate}
-          onChangeText={setDueDate}
-          placeholder="YYYY-MM-DD (ej: 2025-12-31)"
+          onChangeText={(t) => { setDueDate(t); if (errors.dueDate) setErrors((e) => ({ ...e, dueDate: undefined })); }}
+          placeholder="YYYY-MM-DD (ej: 2026-12-31)"
           placeholderTextColor={c.textPlaceholder}
-          style={styles.dateInput}
+          style={[styles.dateInput, errors.dueDate ? { borderWidth: 1, borderColor: '#E53E3E' } : undefined]}
         />
+        {errors.dueDate ? <Text style={styles.errorText}>{errors.dueDate}</Text> : null}
       </ScrollView>
     </SafeAreaView>
   );
